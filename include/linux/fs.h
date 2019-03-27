@@ -309,6 +309,7 @@ struct kiocb {
 	void			*private;
 	int			ki_flags;
 	u16			ki_hint;
+  u64     rid;
 	u16			ki_ioprio; /* See linux/ioprio.h */
 } __randomize_layout;
 
@@ -421,6 +422,7 @@ struct address_space {
 	struct list_head	private_list;	/* for use by the address_space */
 	void			*private_data;	/* ditto */
 	errseq_t		wb_err;
+  u64 rids[256];
 } __attribute__((aligned(sizeof(long)))) __randomize_layout;
 	/*
 	 * On most architectures that alignment is already the case; but
@@ -902,7 +904,7 @@ struct file {
 	struct fown_struct	f_owner;
 	const struct cred	*f_cred;
 	struct file_ra_state	f_ra;
-
+  u64 rid;
 	u64			f_version;
 #ifdef CONFIG_SECURITY
 	void			*f_security;

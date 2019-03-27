@@ -154,6 +154,7 @@ struct bio {
 	blk_status_t		bi_status;
 	u8			bi_partno;
 
+  u64 rid;
 	/* Number of segments in this BIO after
 	 * physical address coalescing is performed.
 	 */

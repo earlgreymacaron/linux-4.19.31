@@ -45,6 +45,7 @@ struct iov_iter {
 			int start_idx;
 		};
 	};
+  u64 rid;
 };
 
 /*
