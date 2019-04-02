@@ -1284,9 +1284,6 @@ retry_grab:
 	if (!page)
 		return -ENOMEM;
 
-  //ReLayTracer
-  page->rid = file->rid;
-
   unlock_page(page);
 
 retry_journal:
