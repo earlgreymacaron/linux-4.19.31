@@ -391,6 +391,10 @@ mpage_readpages(struct address_space *mapping, struct list_head *pages,
 	};
 	unsigned page_idx;
 
+  //ReLayTracer
+  u64 rid;
+  rid = lru_to_page(pages)->rid;
+
 	for (page_idx = 0; page_idx < nr_pages; page_idx++) {
 		struct page *page = lru_to_page(pages);
 
@@ -406,9 +410,13 @@ mpage_readpages(struct address_space *mapping, struct list_head *pages,
 		put_page(page);
 	}
 	BUG_ON(!list_empty(pages));
-	if (args.bio)
+	if (args.bio) {
 		mpage_bio_submit(REQ_OP_READ, REQ_RAHEAD, args.bio);
-	return 0;
+
+    //ReLayTracer
+    args.bio->rid = rid;
+  }
+  return 0;
 }
 EXPORT_SYMBOL(mpage_readpages);
 
@@ -424,8 +432,12 @@ int mpage_readpage(struct page *page, get_block_t get_block)
 	};
 
 	args.bio = do_mpage_readpage(&args);
-	if (args.bio)
+	if (args.bio) {
 		mpage_bio_submit(REQ_OP_READ, 0, args.bio);
+
+    //ReLayTracer
+    args.bio->rid = page->rid;
+  }
 	return 0;
 }
 EXPORT_SYMBOL(mpage_readpage);

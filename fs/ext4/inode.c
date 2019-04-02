@@ -1283,7 +1283,11 @@ retry_grab:
 	page = grab_cache_page_write_begin(mapping, index, flags);
 	if (!page)
 		return -ENOMEM;
-	unlock_page(page);
+
+  //ReLayTracer
+  page->rid = file->rid;
+
+  unlock_page(page);
 
 retry_journal:
 	handle = ext4_journal_start(inode, EXT4_HT_WRITE_PAGE, needed_blocks);

@@ -403,6 +403,10 @@ static ssize_t new_sync_read(struct file *filp, char __user *buf, size_t len, lo
 	kiocb.ki_pos = *ppos;
 	iov_iter_init(&iter, READ, &iov, 1, len);
 
+  //ReLayTracer (after init kiocb and iter)
+  iter.rid = filp->rid;
+  kiocb.rid = filp->rid;
+
 	ret = call_read_iter(filp, &kiocb, &iter);
 	BUG_ON(ret == -EIOCBQUEUED);
 	*ppos = kiocb.ki_pos;
@@ -445,6 +449,9 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 	if (unlikely(!access_ok(VERIFY_WRITE, buf, count)))
 		return -EFAULT;
 
+  //ReLayTracer
+  file->rid = random_get_entropy();
+
 	ret = rw_verify_area(READ, file, pos, count);
 	if (!ret) {
 		if (count > MAX_RW_COUNT)
@@ -470,6 +477,7 @@ static ssize_t new_sync_write(struct file *filp, const char __user *buf, size_t 
 	init_sync_kiocb(&kiocb, filp);
 	kiocb.ki_pos = *ppos;
 	iov_iter_init(&iter, WRITE, &iov, 1, len);
+
 
 	ret = call_write_iter(filp, &kiocb, &iter);
 	BUG_ON(ret == -EIOCBQUEUED);
@@ -982,7 +990,11 @@ ssize_t vfs_readv(struct file *file, const struct iovec __user *vec,
 	ssize_t ret;
 
 	ret = import_iovec(READ, vec, vlen, ARRAY_SIZE(iovstack), &iov, &iter);
-	if (ret >= 0) {
+	
+  //ReLayTracer
+  iter.rid = file->rid; 
+
+  if (ret >= 0) {
 		ret = do_iter_read(file, &iter, pos, flags);
 		kfree(iov);
 	}
@@ -1065,6 +1077,10 @@ static ssize_t do_preadv(unsigned long fd, const struct iovec __user *vec,
 
 	f = fdget(fd);
 	if (f.file) {
+
+    //ReLayTracer
+    f.file->rid = random_get_entropy();
+
 		ret = -ESPIPE;
 		if (f.file->f_mode & FMODE_PREAD)
 			ret = vfs_readv(f.file, vec, vlen, &pos, flags);

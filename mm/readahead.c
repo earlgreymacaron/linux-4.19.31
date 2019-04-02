@@ -196,7 +196,11 @@ unsigned int __do_page_cache_readahead(struct address_space *mapping,
 		if (!page)
 			break;
 		page->index = page_offset;
-		list_add(&page->lru, &page_pool);
+		
+    //ReLayTracer
+    page->rid = mapping->rids[offset%256];
+    
+    list_add(&page->lru, &page_pool);
 		if (page_idx == nr_to_read - lookahead_size)
 			SetPageReadahead(page);
 		nr_pages++;
@@ -410,7 +414,11 @@ ondemand_readahead(struct address_space *mapping,
 	if ((offset == (ra->start + ra->size - ra->async_size) ||
 	     offset == (ra->start + ra->size))) {
 		ra->start += ra->size;
-		ra->size = get_next_ra_size(ra, max_pages);
+
+    //ReLayTracer
+    mapping->rids[ra->start%256] = mapping->rids[offset%256];
+
+    ra->size = get_next_ra_size(ra, max_pages);
 		ra->async_size = ra->size;
 		goto readit;
 	}
@@ -432,7 +440,11 @@ ondemand_readahead(struct address_space *mapping,
 			return 0;
 
 		ra->start = start;
-		ra->size = start - offset;	/* old async_size */
+
+    //ReLayTracer
+    mapping->rids[ra->start%256] = mapping->rids[offset%256];
+
+    ra->size = start - offset;	/* old async_size */
 		ra->size += req_size;
 		ra->size = get_next_ra_size(ra, max_pages);
 		ra->async_size = ra->size;
@@ -479,6 +491,7 @@ readit:
 	 * the resulted next readahead window into the current one.
 	 * Take care of maximum IO pages as above.
 	 */
+
 	if (offset == ra->start && ra->size == ra->async_size) {
 		add_pages = get_next_ra_size(ra, max_pages);
 		if (ra->size + add_pages <= max_pages) {

@@ -102,6 +102,9 @@ int ext4_mpage_readpages(struct address_space *mapping,
 {
 	struct bio *bio = NULL;
 	sector_t last_block_in_bio = 0;
+  //ReLayTracer
+  u64 rid;
+
 
 	struct inode *inode = mapping->host;
 	const unsigned blkbits = inode->i_blkbits;
@@ -121,6 +124,10 @@ int ext4_mpage_readpages(struct address_space *mapping,
 	map.m_lblk = 0;
 	map.m_len = 0;
 	map.m_flags = 0;
+
+  if (pages)
+      page = list_entry(pages->prev, struct page, lru);
+  rid = page->rid;
 
 	for (; nr_pages; nr_pages--) {
 		int fully_mapped = 1;
@@ -261,6 +268,9 @@ int ext4_mpage_readpages(struct address_space *mapping,
 			bio->bi_private = ctx;
 			bio_set_op_attrs(bio, REQ_OP_READ,
 						is_readahead ? REQ_RAHEAD : 0);
+
+      //ReLayTracer
+      bio->rid = rid;
 		}
 
 		length = first_hole << blkbits;

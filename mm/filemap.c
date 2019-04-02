@@ -1594,6 +1594,10 @@ no_page:
 		}
 	}
 
+  //ReLayTracer
+  if(page)
+      page->rid = mapping->rids[offset%256];
+
 	return page;
 }
 EXPORT_SYMBOL(pagecache_get_page);
@@ -2085,6 +2089,9 @@ find_page:
 			goto out;
 		}
 
+    //ReLayTracer
+    mapping->rids[index%256] = iocb->rid;
+
 		page = find_get_page(mapping, index);
 		if (!page) {
 			if (iocb->ki_flags & IOCB_NOWAIT)
@@ -2275,7 +2282,12 @@ no_cached_page:
 			error = -ENOMEM;
 			goto out;
 		}
-		error = add_to_page_cache_lru(page, mapping, index,
+
+    //ReLayTracer
+    page->rid = iocb->rid;
+    mapping->rids[index%256] = iocb->rid;
+
+    error = add_to_page_cache_lru(page, mapping, index,
 				mapping_gfp_constraint(mapping, GFP_KERNEL));
 		if (error) {
 			put_page(page);

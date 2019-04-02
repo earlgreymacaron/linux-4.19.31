@@ -1051,6 +1051,9 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	struct request *req = cmd->request;
 	blk_status_t blk_stat = BLK_STS_OK;
 
+  //ReLayTracer
+  q->rid = req->rid;
+
 	if (unlikely(result))	/* a nz result may or may not be an error */
 		result = scsi_io_completion_nz_result(cmd, result, &blk_stat);
 
@@ -1893,6 +1896,9 @@ static void scsi_request_fn(struct request_queue *q)
 		req = blk_peek_request(q);
 		if (!req)
 			break;
+
+    //ReLayTracer
+    q->rid = req->rid;
 
 		if (unlikely(!scsi_device_online(sdev))) {
 			sdev_printk(KERN_ERR, sdev,

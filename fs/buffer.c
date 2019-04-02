@@ -1944,7 +1944,8 @@ int __block_write_begin_int(struct page *page, loff_t pos, unsigned len,
 	BUG_ON(from > to);
 
 	head = create_page_buffers(page, inode, 0);
-	blocksize = head->b_size;
+
+  blocksize = head->b_size;
 	bbits = block_size_bits(blocksize);
 
 	block = (sector_t)page->index << (PAGE_SHIFT - bbits);
